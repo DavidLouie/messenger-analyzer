@@ -2,6 +2,7 @@ class Person:
 
     def __init__(self, name):
         self._name = name   # never changed once set here
+        self.dates = []
         self.days = {
             'Monday': 0,
             'Tuesday': 0,
