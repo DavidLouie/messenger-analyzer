@@ -98,9 +98,24 @@ def freq_non_word(people, color_map, func, message_type):
 
     plt.show()
 
-# create table ranking people by number of messages, with number of words and word per minute listed
-def produce_table():
-    return 0
+# create table ranking people by number of messages, with number of words and words per message listed
+def produce_table(people):
+    fig, ax = plt.subplots()
+
+    ax.xaxis.set_visible(False)
+    ax.yaxis.set_visible(False)
+
+    # sort people by num messages and compile into table
+    people.sort(key=lambda p: p.total, reverse=True)
+    clust_data = []
+    for p in people:
+        p_data = [p.get_name(), p.total, p.words, round(p.get_words_avg(), 1)]
+        clust_data.append(p_data)
+
+    collabel=("Person", "Number of messages", "Number of words", "Average words per message")
+    ax.table(cellText=clust_data, colLabels=collabel, loc='center')
+
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -108,10 +123,11 @@ if __name__ == "__main__":
     m_p.parse()
     # freq_by_day(m_p.get_people()[0])
     # freq_chrono(m_p.get_dates())
-    color_map = _assign_colors(m_p.get_people())
-    freq_non_word(m_p.get_people(), color_map, Person.get_stick_avg, 'Stickers')
-    freq_non_word(m_p.get_people(), color_map, Person.get_photos_avg, 'Photos')
-    freq_non_word(m_p.get_people(), color_map, Person.get_gifs_avg, 'Gifs')
+    # color_map = _assign_colors(m_p.get_people())
+    # freq_non_word(m_p.get_people(), color_map, Person.get_stick_avg, 'Stickers')
+    # freq_non_word(m_p.get_people(), color_map, Person.get_photos_avg, 'Photos')
+    # freq_non_word(m_p.get_people(), color_map, Person.get_gifs_avg, 'Gifs')
+    produce_table(m_p.get_people())
     m_p.pretty_print()
 
 
