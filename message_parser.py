@@ -23,17 +23,17 @@ class MessageParser:
             for p in self.people:
                 if p.get_name() == s_name:
                     p.total += 1
-                    p.inc_day(day)
+                    p.days[day] += 1
                     p.dates.append(m["timestamp"])
                     if "content" in m:
                         num_words = len(str.split(m["content"]))
-                        p.inc_words(num_words)
+                        p.words += num_words
                     if "photos" in m:
-                        p.inc_photos()
+                        p.photos += 1
                     if "sticker" in m:
-                        p.inc_stickers()
+                        p.stickers += 1
                     if "gifs" in m:
-                        p.inc_gifs()
+                        p.gifs += 1
                     break
         for p in self.people:
             p.dates.sort()
@@ -41,9 +41,5 @@ class MessageParser:
     def pretty_print(self):
         for p in self.people:
             p.pretty_print()
-
-    def get_people(self):
-        return self.people
-
 
 

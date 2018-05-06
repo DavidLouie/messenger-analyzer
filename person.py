@@ -18,26 +18,10 @@ class Person:
         self.gifs = 0
         self.photos = 0
 
-    def inc_day(self, day):
-        self.days[day] += 1
-
-    def inc_words(self, num_words):
-        self.words += num_words
-
-    def inc_stickers(self):
-        self.stickers += 1
-
-    def inc_gifs(self):
-        self.gifs += 1
-
-    def inc_photos(self):
-        self.photos += 1
-
     def pretty_print(self):
         print(self._name)
         for day, num in self.days.items():
             print("    " + day + ": " + str(num))
-           # self.total += num
         print("  Total: " + str(self.total))
         print("  Words: " + str(self.words))
         print("    Avg WPM: " + str(self.get_words_avg()))
@@ -47,9 +31,6 @@ class Person:
         print("     Avg GPM: "  + str(self.get_gifs_avg()))
         print("  Photos: " + str(self.photos))
         print("     Avg PPM: " + str(self.get_photos_avg()))
-
-    def get_days(self):
-        return self.days
 
     def get_name(self):
         return self._name

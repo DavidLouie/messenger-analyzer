@@ -12,7 +12,7 @@ from datetime import timedelta
 def freq_by_day(person):
     objects = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
     y_pos = np.arange(len(objects))
-    freq = person.get_days().values()
+    freq = person.days.values()
     plt.bar(y_pos, freq, align='center', alpha=0.5, color=col_map[person.get_name()])
     plt.xticks(y_pos, objects)
     plt.ylabel('Frequency')
@@ -187,15 +187,15 @@ def produce_table(people):
 if __name__ == "__main__":
     m_p = MessageParser('/home/david/Documents/Personal_Projects/facebookData/messages/dontmebro_08776cf081/message.json', 'David Louie')
     m_p.parse()
-    col_map = _assign_colors(m_p.get_people())
-    freq_by_day(m_p.get_people()[0])
-    freq_chrono(m_p.get_people()[2])
-    freq_chrono_total(m_p.get_people())
-    freq_chrono_stacked(m_p.get_people())
-    freq_non_word(m_p.get_people(), Person.get_stick_avg, 'Stickers')
-    freq_non_word(m_p.get_people(), Person.get_photos_avg, 'Photos')
-    freq_non_word(m_p.get_people(), Person.get_gifs_avg, 'Gifs')
-    produce_table(m_p.get_people())
+    col_map = _assign_colors(m_p.people)
+    freq_by_day(m_p.people[0])
+    freq_chrono(m_p.people[2])
+    freq_chrono_total(m_p.people)
+    freq_chrono_stacked(m_p.people)
+    freq_non_word(m_p.people, Person.get_stick_avg, 'Stickers')
+    freq_non_word(m_p.people, Person.get_photos_avg, 'Photos')
+    freq_non_word(m_p.people, Person.get_gifs_avg, 'Gifs')
+    produce_table(m_p.people)
     m_p.pretty_print()
 
 
