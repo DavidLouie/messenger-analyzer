@@ -40,6 +40,17 @@ def count_timestamps(timestamps, n):
     return freq
 
 
+# produce indices of labels from a list of dates
+def create_ind(d_list):
+    return range(0, len(d_list), len(d_list) // 5)
+
+# produce 5 or 6 evenly spaced labels from a list of dates
+def create_labels(d_list):
+    gap = len(d_list) // 5
+    labels = [d_list[0], d_list[gap], d_list[2 * gap],
+              d_list[3 * gap], d_list[4 * gap], d_list[5 * gap - 1]]
+    return labels
+
 # create bar chart of message frequency for a person on each day over the dataset
 def freq_chrono(person):
     date_list = convert_timestamps(person.dates)
@@ -47,11 +58,8 @@ def freq_chrono(person):
     freq = count_timestamps(person.dates, len(date_list))
     plt.bar(y_pos, freq, align='center', alpha=0.5)
 
-    # produce 6 evenly spaced x-axis labels (need to modify this)
-    gap = len(date_list) // 5
-    ind = range(0, len(date_list), gap)
-    labels = [date_list[0], date_list[gap], date_list[2*gap], date_list[3*gap], date_list[4*gap], date_list[5*gap]]
-    plt.xticks(ind, labels)
+    # produce 5 or 6 evenly spaced x-axis labels
+    plt.xticks(create_ind(date_list), create_labels(date_list))
 
     plt.ylabel('Frequency')
     plt.title(person.get_name() +' message frequency by weekday')
@@ -99,12 +107,8 @@ def freq_chrono_stacked(people, color_map):
                 label=p.get_name())
         prev = list(map(sum,  zip(prev, p_date_freq)))
 
-    # produce 6 evenly spaced x-axis labels (need to modify this)
-    gap = len(date_list) // 5
-    ind = range(0, len(date_list), gap)
-    labels = [date_list[0], date_list[gap], date_list[2 * gap], date_list[3 * gap], date_list[4 * gap],
-              date_list[5 * gap]]
-    plt.xticks(ind, labels)
+    # produce 5 or 6 evenly spaced x-axis labels
+    plt.xticks(create_ind(date_list), create_labels(date_list))
 
     plt.ylabel('Messages per day')
     plt.title('Messages per day by person')
@@ -183,7 +187,7 @@ if __name__ == "__main__":
     m_p = MessageParser('/home/david/Documents/Personal_Projects/facebookData/messages/dontmebro_08776cf081/message.json', 'David Louie')
     m_p.parse()
     # freq_by_day(m_p.get_people()[0])
-    # freq_chrono(m_p.get_people()[1])
+    # freq_chrono(m_p.get_people()[2])
     # freq_chrono_total(m_p.get_people())
     col_map = _assign_colors(m_p.get_people())
     freq_chrono_stacked(m_p.get_people(), col_map)
