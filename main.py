@@ -2,6 +2,7 @@ from message_parser import MessageParser
 from person import Person
 import colorsys
 import matplotlib.pyplot as plt; plt.rcdefaults()
+import matplotlib.backends.backend_pdf
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
@@ -10,14 +11,15 @@ from datetime import timedelta
 
 # create bar chart of message frequency by day of the week
 def freq_by_day(person):
-    objects = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
+    fig = plt.figure()
+    objects = ('Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun')
     y_pos = np.arange(len(objects))
     freq = person.days.values()
-    plt.bar(y_pos, freq, align='center', alpha=0.5, color=col_map[person.get_name()])
+    plt.bar(y_pos, freq, align='center', alpha=0.8, color=col_map[person.get_name()])
     plt.xticks(y_pos, objects)
     plt.ylabel('Frequency')
     plt.title(person.get_name() + ' message frequency by weekday')
-    plt.show()
+    return fig
 
 
 # convert list of sorted timestamps into a list of days ranging from the first to the last
@@ -44,6 +46,7 @@ def count_timestamps(timestamps, n):
 def create_ind(d_list):
     return range(0, len(d_list), len(d_list) // 5)
 
+
 # produce 5 or 6 evenly spaced labels from a list of dates
 def create_labels(d_list):
     gap = len(d_list) // 5
@@ -51,19 +54,21 @@ def create_labels(d_list):
               d_list[3 * gap], d_list[4 * gap], d_list[5 * gap - 1]]
     return labels
 
+
 # create bar chart of message frequency for a person on each day over the dataset
 def freq_chrono(person):
+    fig = plt.figure()
     date_list = convert_timestamps(person.dates)
     y_pos = np.arange(len(date_list))
     freq = count_timestamps(person.dates, len(date_list))
-    plt.bar(y_pos, freq, align='center', alpha=0.5, color=col_map[person.get_name()])
+    plt.bar(y_pos, freq, align='center', alpha=0.8, color=col_map[person.get_name()])
 
     # produce 5 or 6 evenly spaced x-axis labels
     plt.xticks(create_ind(date_list), create_labels(date_list))
 
     plt.ylabel('Frequency')
-    plt.title(person.get_name() +' message frequency by weekday')
-    plt.show()
+    plt.title(person.get_name() +' message frequency')
+    return fig
 
 
 # create bar chart of total message frequency across the dataset
@@ -74,11 +79,12 @@ def freq_chrono_total(people):
         timestamps.extend(p.dates)
     timestamps.sort()
     combined_p.dates = timestamps
-    freq_chrono(combined_p)
+    return freq_chrono(combined_p)
 
 
 # create stacked bar chart of message frequency over the dataset
 def freq_chrono_stacked(people):
+    fig = plt.figure()
     combined_ts = []
     for p in people:
         combined_ts.extend(p.dates)
@@ -112,8 +118,8 @@ def freq_chrono_stacked(people):
 
     plt.ylabel('Messages per day')
     plt.title('Messages per day by person')
-    plt.legend()
-    plt.show()
+    plt.legend(bbox_to_anchor=(1,1), loc="upper left")
+    return fig
 
 
 # generate num_colors unique colors
@@ -141,7 +147,7 @@ def _assign_colors(people):
 # bar chart of average usage of a stat determined by func by person
 def freq_non_word(people, func, message_type):
     # create plot
-    plt.subplots()
+    fig, ax = plt.subplots()
     bar_width = 0.1
     opacity = 0.8
 
@@ -158,10 +164,10 @@ def freq_non_word(people, func, message_type):
 
     plt.xlabel(message_type)
     plt.ylabel('Average number of occurrences per message')
-    plt.legend()
+    plt.legend(bbox_to_anchor=(1,1), loc="upper left")
     plt.tight_layout()
 
-    plt.show()
+    return fig
 
 
 # create table ranking people by number of messages, with number of words and words per message listed
@@ -181,22 +187,32 @@ def produce_table(people):
     collabel=("Person", "Number of messages", "Number of words", "Average words per message")
     ax.table(cellText=clust_data, colLabels=collabel, loc='center')
 
-    plt.show()
+    return fig
 
 
 if __name__ == "__main__":
+    output_pdf = matplotlib.backends.backend_pdf.PdfPages("output.pdf")
     m_p = MessageParser('/home/david/Documents/Personal_Projects/facebookData/messages/dontmebro_08776cf081/message.json', 'David Louie')
     m_p.parse()
     col_map = _assign_colors(m_p.people)
-    freq_by_day(m_p.people[0])
-    freq_chrono(m_p.people[2])
-    freq_chrono_total(m_p.people)
-    freq_chrono_stacked(m_p.people)
-    freq_non_word(m_p.people, Person.get_stick_avg, 'Stickers')
-    freq_non_word(m_p.people, Person.get_photos_avg, 'Photos')
-    freq_non_word(m_p.people, Person.get_gifs_avg, 'Gifs')
-    produce_table(m_p.people)
-    m_p.pretty_print()
+    plot1 = freq_by_day(m_p.people[0])
+    output_pdf.savefig(plot1)
+    plot2 = freq_chrono(m_p.people[2])
+    output_pdf.savefig(plot2)
+    plot3 = freq_chrono_total(m_p.people)
+    output_pdf.savefig(plot3)
+    plot4 = freq_chrono_stacked(m_p.people)
+    output_pdf.savefig(plot4, bbox_inches="tight")
+    plot5 = freq_non_word(m_p.people, Person.get_stick_avg, 'Stickers')
+    output_pdf.savefig(plot5, bbox_inches="tight")
+    plot6 = freq_non_word(m_p.people, Person.get_photos_avg, 'Photos')
+    output_pdf.savefig(plot6, bbox_inches="tight")
+    plot7 = freq_non_word(m_p.people, Person.get_gifs_avg, 'Gifs')
+    output_pdf.savefig(plot7, bbox_inches="tight")
+    plot8 = produce_table(m_p.people)
+    output_pdf.savefig(plot8)
+    #m_p.pretty_print()
+    output_pdf.close()
 
 
 
