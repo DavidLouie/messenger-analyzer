@@ -38,6 +38,11 @@ def count_timestamps(timestamps, n):
     for ts in timestamps:
         cur_day = datetime.fromtimestamp(ts).date()
         delta = cur_day - first_day
+
+        if delta.days >= n:
+            print("n = " + str(n))
+            print("delta.days = " + str(delta.days))
+            break
         freq[delta.days] += 1
     return freq
 
@@ -88,15 +93,15 @@ def freq_chrono_stacked(people):
     combined_ts = []
     for p in people:
         combined_ts.extend(p.dates)
+    combined_ts.sort()
     date_list = convert_timestamps(combined_ts)
-
-    x_ind = np.arange(len(date_list))
-    width = 0.35
 
     # sort people by number of messages to produce a prettier graph
     people.sort(key=lambda p: p.total, reverse=True)
 
     # plot the first person to set the bottom correctly for following people
+    x_ind = np.arange(len(date_list))
+    width = 0.35
     first_p = people[0]
     prev = count_timestamps(first_p.dates, len(date_list))
     plt.bar(x_ind, prev, width,
@@ -164,6 +169,7 @@ def freq_non_word(people, func, message_type):
 
     plt.xlabel(message_type)
     plt.ylabel('Average number of occurrences per message')
+    plt.title('Average number of ' + message_type +' messages')
     plt.legend(bbox_to_anchor=(1,1), loc="upper left")
     plt.tight_layout()
 
@@ -179,6 +185,7 @@ def produce_table(people):
 
     # sort people by num messages and compile into table
     people.sort(key=lambda p: p.total, reverse=True)
+
     clust_data = []
     for p in people:
         p_data = [p.get_name(), p.total, p.words, round(p.get_words_avg(), 1)]
@@ -186,6 +193,7 @@ def produce_table(people):
 
     collabel=("Person", "Number of messages", "Number of words", "Average words per message")
     ax.table(cellText=clust_data, colLabels=collabel, loc='center')
+    plt.title('People by number of messages')
 
     return fig
 
@@ -195,22 +203,28 @@ if __name__ == "__main__":
     m_p = MessageParser('/home/david/Documents/Personal_Projects/facebookData/messages/dontmebro_08776cf081/message.json', 'David Louie')
     m_p.parse()
     col_map = _assign_colors(m_p.people)
-    plot1 = freq_by_day(m_p.people[0])
-    output_pdf.savefig(plot1)
-    plot2 = freq_chrono(m_p.people[2])
-    output_pdf.savefig(plot2)
-    plot3 = freq_chrono_total(m_p.people)
-    output_pdf.savefig(plot3)
-    plot4 = freq_chrono_stacked(m_p.people)
+
+    output_pdf.savefig(produce_table(m_p.people))
+    plt.close()
+    for p in m_p.people:
+        output_pdf.savefig(freq_by_day(p))
+        output_pdf.savefig(freq_chrono(p))
+        plt.close('all')
+    output_pdf.savefig(freq_chrono_total(m_p.people))
+    plt.close()
+    plot1 = freq_chrono_stacked(m_p.people[7:])
+    output_pdf.savefig(plot1, bbox_inches="tight")
+    plt.close()
+    plot2 = freq_non_word(m_p.people, Person.get_stick_avg, 'Stickers')
+    output_pdf.savefig(plot2, bbox_inches="tight")
+    plt.close()
+    plot3 = freq_non_word(m_p.people, Person.get_photos_avg, 'Photos')
+    output_pdf.savefig(plot3, bbox_inches="tight")
+    plt.close()
+    plot4 = freq_non_word(m_p.people, Person.get_gifs_avg, 'Gifs')
     output_pdf.savefig(plot4, bbox_inches="tight")
-    plot5 = freq_non_word(m_p.people, Person.get_stick_avg, 'Stickers')
-    output_pdf.savefig(plot5, bbox_inches="tight")
-    plot6 = freq_non_word(m_p.people, Person.get_photos_avg, 'Photos')
-    output_pdf.savefig(plot6, bbox_inches="tight")
-    plot7 = freq_non_word(m_p.people, Person.get_gifs_avg, 'Gifs')
-    output_pdf.savefig(plot7, bbox_inches="tight")
-    plot8 = produce_table(m_p.people)
-    output_pdf.savefig(plot8)
+    plt.close()
+
     #m_p.pretty_print()
     output_pdf.close()
 
