@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from datetime import timedelta
 
+col_map = {}    # global variable to map conversation participants to colors
 
 # create bar chart of message frequency by day of the week
 def freq_by_day(person):
@@ -72,7 +73,7 @@ def freq_chrono(person):
     plt.xticks(create_ind(date_list), create_labels(date_list))
 
     plt.ylabel('Frequency')
-    plt.title(person.get_name() +' message frequency')
+    plt.title(person.get_name() + ' message frequency')
     return fig
 
 
@@ -169,7 +170,7 @@ def freq_non_word(people, func, message_type):
 
     plt.xlabel(message_type)
     plt.ylabel('Average number of occurrences per message')
-    plt.title('Average number of ' + message_type +' messages')
+    plt.title('Average number of ' + message_type + ' messages')
     plt.legend(bbox_to_anchor=(1,1), loc="upper left")
     plt.tight_layout()
 
@@ -191,43 +192,47 @@ def produce_table(people):
         p_data = [p.get_name(), p.total, p.words, round(p.get_words_avg(), 1)]
         clust_data.append(p_data)
 
-    collabel=("Person", "Number of messages", "Number of words", "Average words per message")
-    ax.table(cellText=clust_data, colLabels=collabel, loc='center')
+    col_label=("Person", "Number of messages", "Number of words", "Average words per message")
+    ax.table(cellText=clust_data, colLabels=col_label, loc='center')
     plt.title('People by number of messages')
 
     return fig
 
 
-if __name__ == "__main__":
-    output_pdf = matplotlib.backends.backend_pdf.PdfPages("output.pdf")
-    m_p = MessageParser('/home/david/Documents/Personal_Projects/facebookData/messages/dontmebro_08776cf081/message.json', 'David Louie')
-    m_p.parse()
-    col_map = _assign_colors(m_p.people)
+# parse file for data and output a pdf of the resulting charts
+def exec_output(filename):
+    mes_par = MessageParser(filename, 'David Louie')
+    mes_par.parse()
+    global col_map
+    col_map = _assign_colors(mes_par.people)
+    prod_pdf(mes_par)
 
-    output_pdf.savefig(produce_table(m_p.people))
+
+# given a Message Parser with parsed data produce an output pdf
+# consisting of charts of various collected data
+def prod_pdf(mes_par):
+    output_pdf = matplotlib.backends.backend_pdf.PdfPages("output.pdf")
+    output_pdf.savefig(produce_table(mes_par.people))
     plt.close()
-    for p in m_p.people:
+    for p in mes_par.people:
         output_pdf.savefig(freq_by_day(p))
         output_pdf.savefig(freq_chrono(p))
         plt.close('all')
-    output_pdf.savefig(freq_chrono_total(m_p.people))
+    output_pdf.savefig(freq_chrono_total(mes_par.people))
     plt.close()
-    plot1 = freq_chrono_stacked(m_p.people[7:])
+    plot1 = freq_chrono_stacked(mes_par.people)
     output_pdf.savefig(plot1, bbox_inches="tight")
     plt.close()
-    plot2 = freq_non_word(m_p.people, Person.get_stick_avg, 'Stickers')
+    plot2 = freq_non_word(mes_par.people, Person.get_stick_avg, 'Stickers')
     output_pdf.savefig(plot2, bbox_inches="tight")
     plt.close()
-    plot3 = freq_non_word(m_p.people, Person.get_photos_avg, 'Photos')
+    plot3 = freq_non_word(mes_par.people, Person.get_photos_avg, 'Photos')
     output_pdf.savefig(plot3, bbox_inches="tight")
     plt.close()
-    plot4 = freq_non_word(m_p.people, Person.get_gifs_avg, 'Gifs')
+    plot4 = freq_non_word(mes_par.people, Person.get_gifs_avg, 'Gifs')
     output_pdf.savefig(plot4, bbox_inches="tight")
     plt.close()
-
-    #m_p.pretty_print()
     output_pdf.close()
-
 
 
 
